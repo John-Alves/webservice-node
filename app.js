@@ -4,14 +4,26 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 var app = express();
 
+const data = require('./data.json');
+getDoctors = () => data.doctors;
+
+
 app.use(bodyParser.json());
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
 app.post('/login', function(req, res){
-    if (req.query.user == 'admin@admin' && req.query.pw == 'admin') res.json( {status: 200} );
-    else res.json( {status: 400} );
+    let user = req.query.user;
+    let pw = req.query.password;
+    let doctors = getDoctors();
+
+    returnCode =  {status: 400};
+    doctors.some(function(doctor){
+        console.log(doctor);
+        if (doctor.login == user && doctor.password == pw) returnCode =  {status: 200, id: doctor.id};
+    });
+    res.json(returnCode);
 });
 
 app.get('/schedule_resume', function(req, res){
