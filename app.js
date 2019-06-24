@@ -40,14 +40,15 @@ app.get('/schedule_resume', function(req, res){
                 else resume[i - 1].free += 1;
             }
             else {
-                var parts = item.date.split('-');
-                let date_obj = new Date(parts[2], parts[1] - 1, parts[0]);
+                let parts = item.date.split('/');
+                let date_obj = new Date(parts[2], Number(parts[1]) - 1, parts[0]);
                 
                 let temp_hash = {
                     weekday: weekdays[date_obj.getDay()],
-                    monthday: `${utils.leftPad((date_obj.getDate() + 1), 2)}`,
+                    monthday: `${utils.leftPad(parts[0], 2)}`,
                     patients: ((item.patient_id != '') ? 1 : 0),
                     free: ((item.patient_id == '') ? 1 : 0),
+                    date: item.date
                 }
                 date_already_inserted.push(item.date);
                 resume.push(temp_hash);
@@ -61,26 +62,20 @@ app.get('/schedule_resume', function(req, res){
 });
 
 app.get('/schedule_day_detail', function(req, res){
-    var medico_id = req.query.medico_id;
-    var date = req.query.data; // 01/07/2019
-    var situations = req.query.situations; // ['ocupado', 'livre', 'faltas']
+    let doctor_id = req.query.medico_id;
+    let date = req.query.data; // 01/07/2019
+    let situations = req.query.situations; // ['ocupado', 'livre', 'faltas']
 
-    var status = 200;
-    var data = [];
+    let status = 200;
+    let returnCode = {status: status, data: []} ;
 
-    if (medico_id && date){
-        data = [
-            { patient: 'Johnny 01', date: '13/06/2019', start: '07:12', end: '07:30', exam: 'CONSULTA OTORRINO' },
-            { patient: 'Johnny 02', date: '13/06/2019', start: '07:15', end: '07:45', exam: 'CONSULTA NEUROLOGISTA'  },
-            { patient: 'Johnny 03', date: '13/06/2019', start: '10:17', end: '10:30', exam: 'CONSULTA NEFROLOGISTA'  },
-            { patient: 'Johnny 04', date: '13/06/2019', start: '10:30', end: '10:50', exam: 'CONSULTA ENDOCRINOLOGISTA'  },
-            { patient: 'Johnny 05', date: '13/06/2019', start: '14:10', end: '14:20', exam: 'CONSULTA OTORRINO'  },
-            { patient: 'Johnny 06', date: '13/06/2019', start: '14:13', end: '15:30', exam: 'CONSULTA OTORRINO'  }
-        ];
+    if (doctor_id && date){
+        resume = database.getDaySchedule(doctor_id, date);
+        returnCode = {status: 200, data: resume};
     }
     else status = 400;
 
-    res.json( {status: status, data: data} );
+    res.json(returnCode);
 });
 
 app.listen(8099, () => console.log('Servidor rodando na porta 8099.'));
