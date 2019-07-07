@@ -24,11 +24,10 @@ app.post('/login', function(req, res){
 
 app.get('/schedule_resume', function(req, res){
     let medico_id = req.query.medico_id;
-    let date = req.query.data; // 07/2019
+    let date = req.query.data; // 2019-07-01
 
     let returnCode =  {status: 400};
     let data = database.getSchedule(medico_id, date);
-    let weekdays = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'];
     let date_already_inserted = [];
 
     if (medico_id && date) {
@@ -39,13 +38,8 @@ app.get('/schedule_resume', function(req, res){
                 if (item.patient_id != '') resume[i - 1].patients += 1;
                 else resume[i - 1].free += 1;
             }
-            else {
-                let parts = item.date.split('/');
-                let date_obj = new Date(parts[2], Number(parts[1]) - 1, parts[0]);
-                
+            else {                
                 let temp_hash = {
-                    weekday: weekdays[date_obj.getDay()],
-                    monthday: `${utils.leftPad(parts[0], 2)}`,
                     patients: ((item.patient_id != '') ? 1 : 0),
                     free: ((item.patient_id == '') ? 1 : 0),
                     date: item.date
@@ -55,13 +49,32 @@ app.get('/schedule_resume', function(req, res){
                 i += 1;
             }
         }
-        returnCode = {status: 200, data: resume};
+        let treatedResume = new Array();
+        for (var item of resume){
+            treatedResume.push({
+                start: item.date, 
+                title: `${item.patients} Pacientes`, 
+                backgroundColor: '#b71c1c',
+                borderColor: "#b71c1c",
+                textColor: '#ffffff',
+
+            });
+            treatedResume.push({
+                start: item.date, 
+                title: `${item.free} Livres`,
+                backgroundColor: '#00e676',
+                borderColor: "#00e676", 
+                textColor: '#000000',
+
+            });
+        }
+        returnCode = {status: 200, data: treatedResume};
     }
 
     res.json(returnCode);
 });
 
-app.get('/schedule_day_detail', function(req, res){
+app.get('/schedule', function(req, res){
     let doctor_id = req.query.medico_id;
     let date = req.query.data; // 01/07/2019
     let situations = req.query.situations; // ['ocupado', 'livre', 'faltas']
