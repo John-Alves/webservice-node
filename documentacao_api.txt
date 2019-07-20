@@ -1,0 +1,126 @@
+################# API do Aplicativo ################# 
+
+Rota:  /login
+Tipo de Requisição: POST
+Descrição: Rota usada para autenticar o usuário no aplicativo.
+JSON da Requisição:
+{						
+    "user": "admin",            
+    "password": "aramis.123"	
+}						
+JSON de resposta:
+{						
+    "status": 200,      /* 200 = Requisição Ok. Esse campo irá ser usado para que o STG avise o App de eventuais erros ou situações atípica. */
+    "id": 1413          /* id do médico no sistema STG. */
+}
+
+----------------------------------------------------------------------
+
+Rota:  /schedule_resume
+Tipo de Requisição: GET
+Descrição:  Rota usada para mostrar os horários no calendário. O aplicativo utiliza o Fullcalendar. O array dentro do atributo "data"
+            do JSON de resposta será interpretado como um evento do Fullcalendar. Todos os atributos e funcionalidades disponiveis 
+            para os eventos podem ser vistos no link: https://fullcalendar.io/docs/event-object
+JSON da Requisição:
+{						
+    "data": "2019-07-01", /* Data no formato YYYY-mm-dd	*/
+    "empresa_id": 1,      /* Caso utilize o filtro de empresa. Para buscar todas as empresa, será enviado o valor "" */
+    "medico_id": 1413	  /* id do médico no sistema STG. */
+}						
+JSON de resposta:
+{						
+    "status": 200,      /* 200 = Requisição Ok. Esse campo irá ser usado para que o STG avise o App de eventuais erros ou situações atípica. */
+    "data": [           /* Array contendo os Eventos do Calendario. */
+        {
+            "start": "2019-06-05", 
+            "title": "15 Pacientes", 
+            /* Cores sugeridas para o horário Ocupado */
+            "backgroundColor": '#b71c1c',
+            "borderColor": "#b71c1c",
+            "textColor": '#ffffff'
+        },
+        {
+            "start": "2019-06-05", 
+            "title": "5 Horarios Livres", 
+            /* Cores sugeridas para o horário Livre */
+            "backgroundColor": '#00e676',
+            "borderColor": "#00e676",
+            "textColor": '#000000'
+        },
+        ...
+    ]
+}
+
+----------------------------------------------------------------------
+
+Rota:  /schedule
+Tipo de Requisição: GET
+Descrição: Rota irá ser chamada ao clicar em um dia no calendário. Deverá buscar e retornar os horários de um determinado dia da Agenda.
+JSON da Requisição:
+{						
+    "data": "2019-07-01", /* Data no formato YYYY-mm-dd	*/
+    "empresa_id": 1,      /* Caso utilize o filtro de empresa. Para buscar todas as empresa, será enviado o valor "" */
+    "medico_id": 1413	  /* id do médico no sistema STG. */
+}						
+JSON de resposta:
+{						
+    "status": 200,      /* 200 = Requisição Ok. Esse campo irá ser usado para que o STG avise o App de eventuais erros ou situações atípica. */
+    "data": [           /* Array contendo os Horários da Agenda. */
+        {
+            "id": 12,                        /* Id desse horário no STG (agenda_exames_id). */
+            "patient_id": 12,                /* Id desse paciente no STG. */
+            "patient": "Daniel Matias",      /* Nome do Paciente. */
+            "patient_cpf": "123.123.123-05", /* Cpf do Paciente. */
+            "patient_birthday": "1994-05-01",/* Data de Nascimento do Paciente. No formato YYYY-mm-dd. */
+            "date": "2019-07-01",            /* Data no formato YYYY-mm-dd */
+            "exam": "Consulta Neurologia",   /* Texto com o procedimento agendado (no momento, não distinção entre consultas e exames) */
+            "start": "13:00",                /* Horário de Inicio */
+            "end": "13:30"                   /* Horário de Término */
+        },
+        ...
+    ]
+}
+
+----------------------------------------------------------------------
+
+Rota:  /patient_history
+Tipo de Requisição: GET
+Descrição: Rota irá ser chamada ao clicar em um horário da Agenda. Deverá buscar e retornar o histórico do Paciente selecionado.
+JSON da Requisição:
+{						
+    "id": 12,           /* Id desse horário no STG (agenda_exames_id). */
+    "patient_id": 12,   /* Caso utilize o filtro de empresa. Para buscar todas as empresa, será enviado o valor "" */
+    "medico_id": 1413	/* id do médico no sistema STG. */
+}						
+JSON de resposta:
+{						
+    "status": 200,      /* 200 = Requisição Ok. Esse campo irá ser usado para que o STG avise o App de eventuais erros ou situações atípica. */
+    "data": [           /* Array contendo o histórico da Agenda. */
+        {
+            "registry_id": 12,               /* Esse ID será mandado de volta para o STG quando for inserir um Adendo e será usado para solicitar o PDF desse laudo. */
+            "date": "2019-07-01",            /* Data no formato YYYY-mm-dd */
+            "exam": "Consulta Neurologia",   /* Texto com o procedimento agendado (no momento, não distinção entre consultas e exames) */
+            "description": "Texto exame",    /* Texto com trecho do laudo. MAXIMO 240 caracteres */
+            "doctor": "Gregory House",       /* Médico responsável por esse exame/consulta */
+        },
+        ...
+    ]
+}
+
+----------------------------------------------------------------------
+
+Rota:  /add_addendum
+Tipo de Requisição: POST
+Descrição: Rota usada para adicionar um Adendo a um laudo antigo.
+JSON da Requisição:
+{						
+    "registry_id": 12,         /* Id recebido na requisição /patient_history que indentifica o laudo no STG. */
+    "description": 12,         /* Esse campo irá conter o texto do Adendo */
+    "image": base_64_string	   /* Caso o médico deseje anexar uma foto, o arquivo será enviado em formato base_64 para o servidor . */
+}						
+JSON de resposta:
+{						
+    "status": 200,      /* 200 = Requisição Ok. Esse campo irá ser usado para que o STG avise o App de eventuais erros ou situações atípica. */
+}
+
+

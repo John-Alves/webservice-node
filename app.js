@@ -76,7 +76,7 @@ app.get('/schedule_resume', function(req, res){
 
 app.get('/schedule', function(req, res){
     let doctor_id = req.query.medico_id;
-    let date = req.query.data; // 01/07/2019
+    let date = req.query.data;
     let situations = req.query.situations; // ['ocupado', 'livre', 'faltas']
 
     let status = 200;
